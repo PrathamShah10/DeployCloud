@@ -10,7 +10,18 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-ecs": "^3.609.0",
+    "@prisma/client": "^5.16.2",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "random-word-slugs": "^0.1.7"
+    "jsonwebtoken": "^9.0.2",
+    "random-word-slugs": "^0.1.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "prisma": "^5.16.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
   }
 }
