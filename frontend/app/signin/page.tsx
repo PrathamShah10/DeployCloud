@@ -20,7 +20,6 @@ const Signin = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log("Signin successful", data);
         localStorage.setItem("token", data.token);
         router.push("/home");
       } else {

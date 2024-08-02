@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/app/redux/hooks";
+import { setDeployments } from "@/app/redux/reducer/deployment";
 import DeploymentList from "../../components/DeploymentList";
 import DeploymentLogs from "../../components/DeploymentLogs";
 import { usePathname } from "next/navigation";
@@ -9,7 +11,10 @@ interface Deployment {
 }
 
 const DeploymentPage = () => {
-  const [deployments, setDeployments] = useState<Deployment[]>([]);
+  console.log('inside', useAppSelector((state) => state))
+  const { deployments } = useAppSelector((state) => state.deployment);
+  const dispatch = useAppDispatch();
+  console.log("we have yay", deployments);
   const [selectedDeploymentId, setSelectedDeploymentId] = useState<
     string | null
   >(null);
@@ -32,7 +37,8 @@ const DeploymentPage = () => {
         );
         if (response.ok) {
           const data = await response.json();
-          setDeployments(data);
+          console.log("got data: ", data);
+          dispatch(setDeployments(data));
         } else {
           console.error("Error fetching deployments");
         }
@@ -82,7 +88,7 @@ const DeploymentPage = () => {
         selectedId={selectedDeploymentId}
         projectId={projectId}
       />
-      {/* <DeploymentLogs logs={logs} />  */}
+      <DeploymentLogs logs={logs} /> 
     </div>
   );
 };

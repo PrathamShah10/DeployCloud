@@ -11,9 +11,16 @@ interface DeploymentListProps {
   selectedId: string | null;
   projectId: string;
 }
-const handleAddingDeployment = async (projectId: string) => {
+interface IhandleAddingDeploymentProps {
+  onSelect: (id: string) => void;
+  projectId: string;
+}
+const handleAddingDeployment = async ({
+  projectId,
+  onSelect,
+}: IhandleAddingDeploymentProps) => {
   try {
-    const response = await fetch(`http://localhost:9000/deployment`, {
+    const response = await fetch(`http://localhost:9000/deploy`, {
       method: "post",
       headers: {
         "Content-Type": "application/json",
@@ -25,6 +32,7 @@ const handleAddingDeployment = async (projectId: string) => {
     });
     if (response.ok) {
       const data = await response.json();
+      onSelect(data.data.deploymentId);
     } else {
       console.error("Error fetching deployments");
     }
@@ -62,7 +70,7 @@ const DeploymentList: React.FC<DeploymentListProps> = ({
       <div>
         <button
           className="ml-4 px-4 py-2 bg-green-400 rounded-lg"
-          onClick={() => handleAddingDeployment(projectId)}
+          onClick={() => handleAddingDeployment({ projectId, onSelect })}
         >
           Create Deployment
         </button>
