@@ -1,23 +1,19 @@
-
 import React from "react";
-
-interface Deployment {
-  id: string;
-}
+import { useAppDispatch, useAppSelector } from "@/app/redux/hooks";
+import { addDeployment, setDeploymentId } from "../redux/reducer/deployment";
 
 interface DeploymentListProps {
-  deployments: Deployment[];
-  onSelect: (id: string) => void;
-  selectedId: string | null;
   projectId: string;
 }
 interface IhandleAddingDeploymentProps {
-  onSelect: (id: string) => void;
+  dispatch: any;
+  setDeploymentId: any;
   projectId: string;
 }
 const handleAddingDeployment = async ({
   projectId,
-  onSelect,
+  dispatch,
+  setDeploymentId,
 }: IhandleAddingDeploymentProps) => {
   try {
     const response = await fetch(`http://localhost:9000/deploy`, {
@@ -32,7 +28,10 @@ const handleAddingDeployment = async ({
     });
     if (response.ok) {
       const data = await response.json();
-      onSelect(data.data.deploymentId);
+      dispatch(
+        addDeployment({ id: data.data.deploymentId, status: data.status })
+      );
+      dispatch(setDeploymentId(data.data.deploymentId));
     } else {
       console.error("Error fetching deployments");
     }
@@ -40,12 +39,11 @@ const handleAddingDeployment = async ({
     console.log(error);
   }
 };
-const DeploymentList: React.FC<DeploymentListProps> = ({
-  deployments,
-  onSelect,
-  selectedId,
-  projectId,
-}) => {
+const DeploymentList: React.FC<DeploymentListProps> = ({ projectId }) => {
+  const { deployments, selectedDeploymentId } = useAppSelector(
+    (state) => state.deployment
+  );
+  const dispatch = useAppDispatch();
   return (
     <div className="flex w-1/4 bg-gray-100 p-4 border-r border-gray-300">
       <div>
@@ -55,13 +53,13 @@ const DeploymentList: React.FC<DeploymentListProps> = ({
             <li
               key={deployment.id}
               className={`p-2 cursor-pointer rounded-md mb-2 ${
-                selectedId === deployment.id
+                selectedDeploymentId === deployment.id
                   ? "bg-blue-500 text-white"
                   : "bg-white"
               }`}
-              onClick={() => onSelect(deployment.id)}
+              onClick={() => dispatch(setDeploymentId(deployment.id))}
             >
-              deployment ${i}
+              deployment {i + 1}
             </li>
           ))}
         </ul>
@@ -70,7 +68,9 @@ const DeploymentList: React.FC<DeploymentListProps> = ({
       <div>
         <button
           className="ml-4 px-4 py-2 bg-green-400 rounded-lg"
-          onClick={() => handleAddingDeployment({ projectId, onSelect })}
+          onClick={() =>
+            handleAddingDeployment({ projectId, dispatch, setDeploymentId })
+          }
         >
           Create Deployment
         </button>

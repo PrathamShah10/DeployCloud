@@ -126,7 +126,7 @@ app.get("/project", authenticateToken, async (req, res) => {
   }
 });
 
-app.get("deployments/:projectId", authenticateToken, async (req, res) => {
+app.get("/deployments/:projectId", authenticateToken, async (req, res) => {
   const { projectId } = req.params;
   try {
     const deployments = await prisma.deployement.findMany({
@@ -176,46 +176,46 @@ app.post("/deploy", async (req, res) => {
   });
 
   // Spin the container
-  const command = new RunTaskCommand({
-    cluster: config.CLUSTER,
-    taskDefinition: config.TASK,
-    launchType: "FARGATE",
-    count: 1,
-    networkConfiguration: {
-      awsvpcConfiguration: {
-        assignPublicIp: "ENABLED",
-        subnets: process.env.AWS_SUBNETS.split(","),
-        securityGroups: process.env.AWS_SECURITY_GROUPS.split(","),
-      },
-    },
-    overrides: {
-      containerOverrides: [
-        {
-          name: "builder-imagecontainer",
-          environment: [
-            { name: "GIT_REPOSITORY__URL", value: project.gitURL },
-            { name: "PROJECT_ID", value: project.subDomain },
-            { name: "DEPLOYMENT_ID", value: deployment.id },
-            { name: "AWS_ACCESS_KEY_ID", value: process.env.AWS_ACCESS_KEY_ID },
-            {
-              name: "AWS_SECRET_ACCESS_KEY",
-              value: process.env.AWS_SECRET_ACCESS_KEY,
-            },
-          ],
-        },
-      ],
-    },
-  });
+  // const command = new RunTaskCommand({
+  //   cluster: config.CLUSTER,
+  //   taskDefinition: config.TASK,
+  //   launchType: "FARGATE",
+  //   count: 1,
+  //   networkConfiguration: {
+  //     awsvpcConfiguration: {
+  //       assignPublicIp: "ENABLED",
+  //       subnets: process.env.AWS_SUBNETS.split(","),
+  //       securityGroups: process.env.AWS_SECURITY_GROUPS.split(","),
+  //     },
+  //   },
+  //   overrides: {
+  //     containerOverrides: [
+  //       {
+  //         name: "builder-imagecontainer",
+  //         environment: [
+  //           { name: "GIT_REPOSITORY__URL", value: project.gitURL },
+  //           { name: "PROJECT_ID", value: project.subDomain },
+  //           { name: "DEPLOYMENT_ID", value: deployment.id },
+  //           { name: "AWS_ACCESS_KEY_ID", value: process.env.AWS_ACCESS_KEY_ID },
+  //           {
+  //             name: "AWS_SECRET_ACCESS_KEY",
+  //             value: process.env.AWS_SECRET_ACCESS_KEY,
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //   },
+  // });
 
-  const response = await ecsClient.send(command);
-  const taskId = response.tasks[0].taskArn;
+  // const response = await ecsClient.send(command);
+  // const taskId = response.tasks[0].taskArn;
 
-  const intervalId = setInterval(async () => {
-    const status = await checkTaskStatus(taskId, deployment.id);
-    if (status === "READY") {
-      clearInterval(intervalId);
-    }
-  }, 5000);
+  // const intervalId = setInterval(async () => {
+  //   const status = await checkTaskStatus(taskId, deployment.id);
+  //   if (status === "READY") {
+  //     clearInterval(intervalId);
+  //   }
+  // }, 5000);
 
   return res.json({ status: "queued", data: { deploymentId: deployment.id } });
 });

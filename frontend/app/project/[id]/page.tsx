@@ -6,23 +6,13 @@ import DeploymentList from "../../components/DeploymentList";
 import DeploymentLogs from "../../components/DeploymentLogs";
 import { usePathname } from "next/navigation";
 
-interface Deployment {
-  id: string;
-}
 
 const DeploymentPage = () => {
-  console.log('inside', useAppSelector((state) => state))
-  const { deployments } = useAppSelector((state) => state.deployment);
+  const { selectedDeploymentId } = useAppSelector((state) => state.deployment);
   const dispatch = useAppDispatch();
-  console.log("we have yay", deployments);
-  const [selectedDeploymentId, setSelectedDeploymentId] = useState<
-    string | null
-  >(null);
   const [logs, setLogs] = useState<string[]>([]);
   const projectId = usePathname().split("/")[2];
-
   useEffect(() => {
-    // Fetch deployments
     const fetchDeployments = async () => {
       try {
         const response = await fetch(
@@ -37,7 +27,6 @@ const DeploymentPage = () => {
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("got data: ", data);
           dispatch(setDeployments(data));
         } else {
           console.error("Error fetching deployments");
@@ -48,13 +37,13 @@ const DeploymentPage = () => {
     };
 
     fetchDeployments();
-  }, []);
+  }, [dispatch, projectId]);
 
   useEffect(() => {
     if (selectedDeploymentId) {
-      // Fetch logs for the selected deployment
       const fetchLogs = async () => {
         try {
+          console.log('hore logs fetch')
           const response = await fetch(
             `http://localhost:9000/logs/${selectedDeploymentId}`,
             {
@@ -83,9 +72,6 @@ const DeploymentPage = () => {
   return (
     <div className="h-screen flex">
       <DeploymentList
-        deployments={deployments}
-        onSelect={setSelectedDeploymentId}
-        selectedId={selectedDeploymentId}
         projectId={projectId}
       />
       <DeploymentLogs logs={logs} /> 

@@ -8,10 +8,12 @@ interface Deployment {
 
 interface DeploymentState {
   deployments: Deployment[];
+  selectedDeploymentId: string | undefined;
 }
 
 const initialState: DeploymentState = {
   deployments: [],
+  selectedDeploymentId: undefined,
 };
 
 const deploymentSlice = createSlice({
@@ -19,14 +21,16 @@ const deploymentSlice = createSlice({
   initialState,
   reducers: {
     setDeployments: (state, action: PayloadAction<Deployment[]>) => {
-      console.log("here after dispatching");
       state.deployments = action.payload;
     },
     addDeployment: (state, action: PayloadAction<Deployment>) => {
       state.deployments.push(action.payload);
     },
+    setDeploymentId: (state, action: PayloadAction<string>) => {
+      state.selectedDeploymentId = action.payload;
+    },
   },
 });
 
-export const { setDeployments, addDeployment } = deploymentSlice.actions;
+export const { setDeployments, addDeployment, setDeploymentId } = deploymentSlice.actions;
 export default deploymentSlice.reducer;
