@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const { generateSlug } = require("random-word-slugs");
-const { ECSClient, RunTaskCommand } = require("@aws-sdk/client-ecs");
+const { ECSClient, RunTaskCommand, DescribeTasksCommand } = require("@aws-sdk/client-ecs");
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -31,6 +31,34 @@ const config = {
   CLUSTER: process.env.AWS_CLUSTER,
   TASK: process.env.AWS_TASK,
 };
+
+
+
+
+
+async function checkTaskStatus(taskId, deploymentId) {
+  const command = new DescribeTasksCommand({
+    cluster: config.CLUSTER,
+    tasks: [taskId],
+  });
+
+  const response = await ecsClient.send(command);
+  const task = response.tasks[0];
+
+  if (task && task.lastStatus === "STOPPED") {
+    // Update the deployment status in the database
+    await prisma.deployement.update({
+      where: { id: deploymentId },
+      data: { status: "READY" },
+    });
+    return "READY";
+  } else {
+    return "IN_PROGRESS";
+  }
+}
+
+
+
 
 app.post("/signup", async (req, res) => {
   const { email, password, name } = req.body;
@@ -140,7 +168,6 @@ app.post("/deploy", async (req, res) => {
   const project = await prisma.project.findUnique({ where: { id: projectId } });
   if (!project) return res.status(404).json({ error: "Project not found" });
 
-  // Check if there is no running deployement
   const deployment = await prisma.deployement.create({
     data: {
       project: { connect: { id: projectId } },
@@ -149,38 +176,46 @@ app.post("/deploy", async (req, res) => {
   });
 
   // Spin the container
-  // const command = new RunTaskCommand({
-  //   cluster: config.CLUSTER,
-  //   taskDefinition: config.TASK,
-  //   launchType: "FARGATE",
-  //   count: 1,
-  //   networkConfiguration: {
-  //     awsvpcConfiguration: {
-  //       assignPublicIp: "ENABLED",
-  //       subnets: process.env.AWS_SUBNETS.split(","),
-  //       securityGroups: process.env.AWS_SECURITY_GROUPS.split(","),
-  //     },
-  //   },
-  //   overrides: {
-  //     containerOverrides: [
-  //       {
-  //         name: "builder-imagecontainer",
-  //         environment: [
-  //           { name: "GIT_REPOSITORY__URL", value: project.gitURL },
-  //           { name: "PROJECT_ID", value: project.subDomain },
-  //           { name: "DEPLOYMENT_ID", value: deployment.id },
-  //           { name: "AWS_ACCESS_KEY_ID", value: process.env.AWS_ACCESS_KEY_ID },
-  //           {
-  //             name: "AWS_SECRET_ACCESS_KEY",
-  //             value: process.env.AWS_SECRET_ACCESS_KEY,
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   },
-  // });
+  const command = new RunTaskCommand({
+    cluster: config.CLUSTER,
+    taskDefinition: config.TASK,
+    launchType: "FARGATE",
+    count: 1,
+    networkConfiguration: {
+      awsvpcConfiguration: {
+        assignPublicIp: "ENABLED",
+        subnets: process.env.AWS_SUBNETS.split(","),
+        securityGroups: process.env.AWS_SECURITY_GROUPS.split(","),
+      },
+    },
+    overrides: {
+      containerOverrides: [
+        {
+          name: "builder-imagecontainer",
+          environment: [
+            { name: "GIT_REPOSITORY__URL", value: project.gitURL },
+            { name: "PROJECT_ID", value: project.subDomain },
+            { name: "DEPLOYMENT_ID", value: deployment.id },
+            { name: "AWS_ACCESS_KEY_ID", value: process.env.AWS_ACCESS_KEY_ID },
+            {
+              name: "AWS_SECRET_ACCESS_KEY",
+              value: process.env.AWS_SECRET_ACCESS_KEY,
+            },
+          ],
+        },
+      ],
+    },
+  });
 
-  // await ecsClient.send(command);
+  const response = await ecsClient.send(command);
+  const taskId = response.tasks[0].taskArn;
+
+  const intervalId = setInterval(async () => {
+    const status = await checkTaskStatus(taskId, deployment.id);
+    if (status === "READY") {
+      clearInterval(intervalId);
+    }
+  }, 5000);
 
   return res.json({ status: "queued", data: { deploymentId: deployment.id } });
 });
