@@ -19,6 +19,7 @@ const HomePage = () => {
     name: "",
     gitURL: "",
   });
+  const [selectedScreen, setSelectedScreen] = useState<string>("ALL_PROJECTS");
 
   const getAllProjects = async () => {
     try {
@@ -69,55 +70,96 @@ const HomePage = () => {
       }
     }
   };
-
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">My Projects</h1>
+    <div className="min-h-screen bg-white">
+      <div className="w-[75%] container mx-auto py-16 px-6">
+        <h1 className="text-3xl font-bold mb-6 text-center text-black">
+          Your Dashboard
+        </h1>
 
-      <div className="mb-8 p-6 border rounded-lg shadow-md bg-gray-50">
-        <h2 className="text-2xl font-semibold mb-4">Create New Project</h2>
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          <input
-            type="text"
-            placeholder="Project Name"
-            className="border p-2 rounded-md flex-1"
-            value={newProject.name}
-            onChange={(e) =>
-              setNewProject({ ...newProject, name: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="Project Git URL"
-            className="border p-2 rounded-md flex-1"
-            value={newProject.gitURL}
-            onChange={(e) =>
-              setNewProject({ ...newProject, gitURL: e.target.value })
-            }
-          />
+        <div className="mb-12">
+          <div className="text-xl flex items-center font-semibold mb-4 text-black">
+            <h3
+              className={`${
+                selectedScreen === "ALL_PROJECTS"
+                  ? "px-4 py-2 bg-black text-white rounded-lg"
+                  : ""
+              } cursor-pointer transition duration-300`}
+              onClick={() => setSelectedScreen("ALL_PROJECTS")}
+            >
+              All Projects
+            </h3>
+            <span className="mx-2 text-gray-700">|</span>
+            <h3
+              className={`${
+                selectedScreen === "NEW_PROJECT"
+                  ? "px-4 py-2 bg-black text-white rounded-lg"
+                  : ""
+              } cursor-pointer transition duration-300`}
+              onClick={() => setSelectedScreen("NEW_PROJECT")}
+            >
+              Add New Project
+            </h3>
+          </div>
+
+          {selectedScreen === "ALL_PROJECTS" ? (
+            <ul className="space-y-4">
+              {projects.map((project, index) => (
+                <Link href={`/project/${project?.id}`} key={index}>
+                  <div className="flex items-center p-4 rounded-lg shadow-sm bg-white border border-gray-300 hover:bg-gray-100 transition duration-300 mb-4">
+                    <div className="flex-1 flex flex-col">
+                      <p className="text-xl font-semibold mb-2">
+                        {project.name}
+                      </p>
+                      <p className="text-gray-600 mb-2">
+                        Domain: {project.subDomain}
+                      </p>
+                      <p className="text-gray-600 mb-1">
+                        Project URL: {project.gitURL}
+                      </p>
+                    </div>
+                    <span className="text-gray-600 ml-4">→</span>
+                  </div>
+                </Link>
+              ))}
+            </ul>
+          ) : (
+            <div className="bg-white p-8 rounded-lg shadow-md">
+              <h2 className="text-2xl font-semibold mb-4 text-black">
+                Create New Project
+              </h2>
+              <div className="flex flex-col gap-4">
+                <input
+                  type="text"
+                  placeholder="Project Name"
+                  value={newProject.name}
+                  onChange={(e) =>
+                    setNewProject({ ...newProject, name: e.target.value })
+                  }
+                  required
+                  className="w-full border p-3 rounded-lg border-gray-300 focus:outline-none focus:ring-0 focus:border-black"
+                />
+                <input
+                  type="text"
+                  placeholder="Project Git URL"
+                  value={newProject.gitURL}
+                  onChange={(e) =>
+                    setNewProject({ ...newProject, gitURL: e.target.value })
+                  }
+                  required
+                  className="w-full border p-3 rounded-lg border-gray-300 focus:outline-none focus:ring-0 focus:border-black"
+                />
+                <button
+                  onClick={addProject}
+                  className="w-full py-3 bg-black text-white rounded-lg hover:bg-white hover:text-black border border-black transition duration-300"
+                >
+                  Create Project
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-        <button
-          onClick={addProject}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md"
-        >
-          Create Project
-        </button>
       </div>
-
-      <ul>
-        {projects.map((project) => (
-          <li
-            key={project?.id}
-            className="border p-4 mb-4 rounded-lg shadow-sm"
-          >
-            <Link href={`/project/${project?.id}`}>
-              <p className="text-xl font-semibold">{project.name}</p>
-            </Link>
-            <p className="text-blue-600">{project.gitURL}</p>
-            <p className="text-blue-600">{project.subDomain}</p>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 };

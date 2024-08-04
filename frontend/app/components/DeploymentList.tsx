@@ -45,35 +45,32 @@ const DeploymentList: React.FC<DeploymentListProps> = ({ projectId }) => {
   );
   const dispatch = useAppDispatch();
   return (
-    <div className="flex w-1/4 bg-gray-100 p-4 border-r border-gray-300">
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Deployments</h2>
-        <ul>
-          {deployments.map((deployment, i) => (
-            <li
-              key={deployment.id}
-              className={`p-2 cursor-pointer rounded-md mb-2 ${
-                selectedDeploymentId === deployment.id
-                  ? "bg-blue-500 text-white"
-                  : "bg-white"
-              }`}
-              onClick={() => dispatch(setDeploymentId(deployment.id))}
-            >
-              deployment {i + 1}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div>
+    <div className="flex w-1/4 bg-white p-4 border-r border-gray-500">
+      <div className="flex flex-col w-full">
+        <h2 className="text-xl font-bold mb-4 text-gray-800">Deployments</h2>
         <button
-          className="ml-4 px-4 py-2 bg-green-400 rounded-lg"
+          className="mt-4 w-full mb-2 py-2 bg-green-400 text-white rounded-full hover:bg-green-600 transition duration-300"
           onClick={() =>
             handleAddingDeployment({ projectId, dispatch, setDeploymentId })
           }
         >
           Create Deployment
         </button>
+        <ul className="flex-1 space-y-2">
+          {deployments.map((deployment, i) => (
+            <li
+              key={deployment.id}
+              className={`px-4 py-3 cursor-pointer rounded-md transition duration-300 ${
+                selectedDeploymentId === deployment.id
+                  ? "bg-black text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+              }`}
+              onClick={() => dispatch(setDeploymentId(deployment.id))}
+            >
+              Deployment {i + 1}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
