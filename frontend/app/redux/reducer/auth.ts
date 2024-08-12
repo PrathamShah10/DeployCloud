@@ -1,7 +1,7 @@
-"use client";
+
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface AuthState {
+ interface AuthState {
   isAuthenticated: boolean;
 }
 
@@ -14,10 +14,11 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     changeAuthStatus: (state, action: PayloadAction<boolean>) => {
+      console.log('hua kya bhai', action.payload)
       state.isAuthenticated = action.payload;
     },
   },
 });
 
 export const { changeAuthStatus } = authSlice.actions;
-export default authSlice.reducer;
+export const authReducer = authSlice.reducer;

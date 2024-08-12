@@ -1,6 +1,21 @@
+'use client'
 import Image from "next/image";
-
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { changeAuthStatus } from "./redux/reducer/auth";
+import { useAppDispatch, useAppSelector } from "./redux/hooks";
 export default function Home() {
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      if (!isAuthenticated) dispatch(changeAuthStatus(true));
+      router.push("/home");
+    } else {
+      router.push("/signin");
+    }
+  }, []);
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">

@@ -23,8 +23,8 @@ const Signin = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem("token", data.token);
-        dispatch(changeAuthStatus(true));
+        await localStorage.setItem("token", data.token);
+        await dispatch(changeAuthStatus(true));
         router.push("/home");
       } else {
         console.error("Signin failed", response.statusText);
