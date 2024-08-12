@@ -1,3 +1,4 @@
 node_modules
 .env
 references.txt
+kafka.pem

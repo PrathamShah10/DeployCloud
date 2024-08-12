@@ -14,14 +14,14 @@ const s3Client = new S3Client({
 });
 
 const PROJECT_ID = process.env.PROJECT_ID;
-const DEPLOYEMENT_ID = process.env.DEPLOYEMENT_ID;
+const DEPLOYMENT_ID = process.env.DEPLOYMENT_ID;
 
 const producer = kafka.producer();
 
 async function publishLog(log) {
   await producer.send({
     topic: `container-logs`,
-    messages: [{ key: "log", value: JSON.stringify({ DEPLOYEMENT_ID, log }) }],
+    messages: [{ key: "log", value: JSON.stringify({ DEPLOYMENT_ID, log }) }],
   });
 }
 

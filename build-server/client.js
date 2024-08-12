@@ -1,9 +1,17 @@
 const { Kafka } = require("kafkajs");
-
+const path = require("path");
+const fs = require("fs");
 const kafka = new Kafka({
   clientId: "my-app",
-  // brokers: ["192.168.0.187:9092"],
-  brokers: ['kafka1:9092', 'kafka2:9092'],
+  brokers: [process.env.KAFKA_BROKER],
+  sasl: {
+    username: "avnadmin",
+    password: "AVNS_ovI903sKbsx3VkS-BJq",
+    mechanism: "plain",
+  },
+  ssl: {
+    ca: [fs.readFileSync(path.join(__dirname, "kafka.pem"), "utf-8")],
+  },
 });
 
 module.exports = { kafka };

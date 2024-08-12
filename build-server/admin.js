@@ -1,5 +1,6 @@
 const { kafka } = require("./client");
 
+// -------------------------------------------------- topic created --------------------------------------------------
 async function init() {
   const admin = kafka.admin();
   console.log("Admin connecting...");
