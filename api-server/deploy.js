@@ -50,6 +50,15 @@ router.post("/deploy", async (req, res) => {
               name: "KAFKA_BROKER",
               value: process.env.KAFKA_BROKER,
             },
+            {
+              name: "KAFKA_USERNAME",
+              value: process.env.KAFKA_USERNAME,
+            },
+
+            {
+              name: "KAFKA_PASSWORD",
+              value: process.env.KAFKA_PASSWORD,
+            },
           ],
         },
       ],
