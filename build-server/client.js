@@ -5,8 +5,8 @@ const kafka = new Kafka({
   clientId: "my-app",
   brokers: [process.env.KAFKA_BROKER],
   sasl: {
-    username: "avnadmin",
-    password: "AVNS_ovI903sKbsx3VkS-BJq",
+    username: process.env.KAFKA_USERNAME,
+    password: process.env.KAFKA_KEY,
     mechanism: "plain",
   },
   ssl: {
